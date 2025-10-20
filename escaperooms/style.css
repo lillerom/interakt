@@ -1,6 +1,6 @@
 
     body {
-        background-color: #1A1C2B;
+        background-color: #272525;
         color: #B2DFD3;
         font-family: Arial, sans-serif;
         display: flex;
@@ -89,7 +89,7 @@
 
     .search-container button {
         border: none; /* Ingen kantlinje for knappen. */
-        background-color: #041A4B; /* Mørkeblå baggrundsfarve. */
+        background-color: #272525; /* Mørkeblå baggrundsfarve. */
         color: white; /* Hvid tekstfarve for knappen. */
         padding: 5px 15px; /* Indvendig plads i knappen, som skaber plads mellem tekst og kant. */
         border-radius: 20px; /* Runde hjørner på knappen. */
@@ -127,7 +127,7 @@
         margin: 10px 0;
     }
     .menu a {
-        color:#1A1C2B;
+        color:#272525;
         text-decoration: none;
     }
     .hamburger {
