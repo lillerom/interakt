@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="da">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <link id="theme-style" rel="stylesheet" href="style.css">
+    <link rel="icon" href="images/iaikon.png" type="image/x-icon">
+    <style>
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    height: 100vh;
+}
+
+.quiz-container {
+    background: #fff;
+    padding: 20px;
+    color: black;
+    border-radius: 8px;
+    width: 300px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+h1 {
+    text-align: center;
+}
+
+button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    background: #B2DFD3;
+    color: black;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #64C295;
+}
+</style>
+</head>
+<body>
+    <header class="header">
+        <!-- Første kolonne: Logo -->
+        <div class="column column-1">
+            <a href="loggedin.html">
+                <img id="logo" src="images/logohvid.png" alt="Logo" class="logo">
+            </a>
+        </div>
+        
+        <!-- Anden kolonne: Titel -->
+        <div class="column column-2">
+            <div class="title">
+            <h1>Quiz</h1>
+            </div>
+        </div>
+        
+        <!-- Tredje kolonne: Nested kolonner -->
+        <div class="column column-3">
+            <div class="nested-columns">
+                
+                <!-- Første nested kolonne: Tema-knap -->
+                <div class="nested-column nested-column-1">
+                    <div class="container">
+                        
+                    </div>
+                </div>
+                
+                <!-- Anden nested kolonne: Søgefelt -->
+                <div class="nested-column nested-column-2">
+                   
+                </div>
+                
+                
+                <!-- Tredje nested kolonne: Hamburger-menu -->
+                <div class="nested-column nested-column-3">
+                    <div class="hamburger" onclick="toggleMenu()"> <!-- Hamburger-ikon med klikfunktion -->
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                    <div class="menu" id="menu"> <!-- Menu der åbner med hamburgeren -->
+                        <ul>
+                            <li><a href="loggedin.html">Forside</a></li> <!-- Menu link 1 -->
+                            <li><a href="dansk.html">Dansk</a></li> <!-- Menu link 2 -->
+                            <li><a href="underconstruction.html">Engelsk</a></li> <!-- Menu link 3 -->
+                            <li><a href="underconstruction.html">Historie</a></li> <!-- Menu link 4 -->
+                            <li><a href="underconstruction.html">Matematik</a></li> <!-- Menu link 5 -->
+                            <li><a href="underconstruction.html">Samfundsfag</a></li> <!-- Menu link 6 -->
+                            <li><a href="om.html">Om Interakt</a></li> <!-- Menu link 7 -->
+                        </ul>
+                    </div>
+                </div> <!-- Slut på tredje nested kolonne -->
+                
+            </div> <!-- Slut på nested kolonner -->
+        </div> <!-- Slut på tredje kolonne -->
+        
+    </header>
+    <div class="quiz-container">
+        <h1>Hyrdinden og skorstensfejeren</h1>
+        <div id="quiz"></div>
+        <button id="submit">Tjek svar</button>
+        <div id="result"></div>
+    </div>
+    
+
+<script>
+const quizData = [
+    {
+        question: "Hvad stod der i dagligstuen?",
+        a: "Et gammelt træskab",
+        b: "En stor kiste",
+        c: "Et spejlskab",
+        correct: "a"
+    },
+    {
+        question: "Hvad kaldte børnene figuren på skabet?",
+        a: "Gedebukkebens-general",
+        b: "Gedebukkebens-overogundergeneral-krigskommandersergenten",
+        c: "Kinesergeneralen",
+        correct: "b"
+    },
+    {
+        question: "Hvad var hyrdinden lavet af?",
+        a: "Træ",
+        b: "Porcelæn",
+        c: "Metal",
+        correct: "b"
+    },
+    {
+        question: "Hvad ønskede hyrdinden og skorstensfejeren?",
+        a: "At blive gift i skabet",
+        b: "At flygte ud i den vide verden",
+        c: "At bo hos kineseren",
+        correct: "b"
+    },
+    {
+        question: "Hvor endte de til sidst?",
+        a: "På skorstensranden",
+        b: "I potpourrikrukken",
+        c: "Tilbage på bordet under spejlet",
+        correct: "c"
+    }
+];
+
+const quiz = document.getElementById('quiz');
+const submitBtn = document.getElementById('submit');
+const result = document.getElementById('result');
+
+let currentQuiz = 0;
+let score = 0;
+
+function loadQuiz() {
+    const current = quizData[currentQuiz];
+    quiz.innerHTML = `
+        <h2>${current.question}</h2>
+        <label><input type="radio" name="answer" value="a"> ${current.a}</label><br>
+        <label><input type="radio" name="answer" value="b"> ${current.b}</label><br>
+        <label><input type="radio" name="answer" value="c"> ${current.c}</label>
+    `;
+}
+
+submitBtn.addEventListener('click', () => {
+    const answer = document.querySelector('input[name="answer"]:checked');
+    if (answer) {
+        if (answer.value === quizData[currentQuiz].correct) {
+            score++;
+        }
+        currentQuiz++;
+        if (currentQuiz < quizData.length) {
+            loadQuiz();
+        } else {
+            quiz.innerHTML = `<h2 style="text-align:center;">Du fik ${score}/${quizData.length} rigtige!</h2>`;
+            submitBtn.style.display = 'none';
+        }
+    } else {
+        alert("Vælg et svar!");
+    }
+});
+
+loadQuiz();
+
+function toggleMenu() { 
+    // Funktion til at vise/skjule menuen
+    const menu = document.querySelector('.menu'); 
+    // Finder menuen
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block'; 
+    // Skifter mellem at vise og skjule menuen
+}
+</script>
+</body>
+<footer>
+        <p>Skriv til Interakt <a href="mailto:linda.rom@hotmail.com">interakt@interakt.dk</a></p>
+</footer>
+</html>

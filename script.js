@@ -49,10 +49,3 @@ function toggleMenu() {
 }
 
 
-function searchSite() {
-    var query = document.getElementById('search').value;
-    if (query) {
-        window.location.href = 'searchResults.html?q=' + encodeURIComponent(query);
-    }
-    return false; // Forhindrer formens standardindsendelse
-}

@@ -15,7 +15,7 @@
     <header class="header">
         <!-- Første kolonne: Logo -->
         <div class="column column-1">
-            <a href="../index.html">
+            <a href="../loggedin.html">
                 <img id="logo" src="../images/logohvid.png" alt="Logo" class="logo">
             </a>
         </div>
@@ -96,7 +96,7 @@
       const korrektSvar = "potpourrikrukken"; // ← Skift dette til det korrekte svar
 
       if (input.value.trim().toLowerCase() === korrektSvar.toLowerCase()) {
-        window.location.href = "../loggedin.html"; // ← Skift til den ønskede side
+        window.location.href = "../quiz.html"; // ← Skift til den ønskede side
       } else {
         input.value = "";
         fejlbesked.style.display = "block";
