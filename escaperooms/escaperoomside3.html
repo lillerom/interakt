@@ -42,13 +42,15 @@
             <div class="kolonne midte"><!-- Alt indhold her -->
                         <h2>Hyrdinden og skorstensfejeren</h2>
                         <p>Af H. C. Andersen </p>
-                        <p>Der stod han med sin stige så nydeligt, og med et ansigt, så hvidt og rødt, som en pige og det var egentligt en fejl, for lidt sort kunne han gerne have været. Han stod ganske nær ved hyrdinden; de var begge to stillet hvor de stod, og da de nu var stillet, så havde de forlovet sig, de passede jo for hinanden, de var unge folk, de var af samme porcelæn og begge lige skrøbelige.</p>
-                        <br>
-                        <p>Tæt ved dem stod der nok en dukke, der var tre gange større, det var en gammel kineser, som kunne nikke; han var også af porcelæn og sagde at han var bedstefader til den lille hyrdinde, men det kunne han nok ikke bevise, han påstod at han havde magt over hende, og derfor havde han nikket til gedebukkebens-overogundergeneral­krigskommander­sergenten, der friede til den lille hyrdinde.</p>
-                        <br>
-                        <p>"Der får du en mand," sagde den gamle kineser, "en mand, som jeg næsten tror er af mahognitræ, han kan gøre dig til gedebukkebens-overogundergeneral­krigskommander­sergentinde, han har hele skabet fuldt af sølvtøj, foruden hvad han har i de hemmelige gemmer!"</p>
-                        <br>
-                        <p>Hvem ville kineseren have at gedebukkebens-overogundergeneral­krigskommander­sergenten giftede sig med?</p>
+                        <p>"Jeg vil ikke ind i det mørke skab!" sagde den lille hyrdinde, "jeg har hørt sige, at han har derinde elve porcelænskoner!" -</p>
+                        <p>"Så kan du være den tolvte!" sagde kineseren, "i nat, så snart det knager i det gamle skab, skal I have bryllup, så sandt som jeg er en kineser!" og så nikkede han med hovedet og faldt i søvn.</p>
+                        <p>Men den lille hyrdinde græd og så på sin hjertensallerkæreste, den porcelænsskorstensfejer.</p>
+                        <p>"Jeg tror jeg vil bede dig," sagde hun, "at du vil gå med mig ud i den vide verden, for her kan vi ikke blive!"</p>
+                        <p>"Jeg vil alt hvad du vil!" sagde den lille skorstensfejer, "lad os straks gå, jeg tænker nok jeg kan ernære dig ved professionen!"</p>
+                        <p>"Bare vi var vel nede af bordet!" sagde hun, "jeg bliver ikke glad før vi er ude i den vide verden!"</p>
+                        <p>Og han trøstede hende og viste hvor hun skulle sætte sin lille fod på de udskårne kanter og det forgyldte løvværk ned om bordbenet, sin stige tog han også til hjælp og så var de nede på gulvet, men da de så hen til det gamle skab, var der sådant et røre; alle de udskårne hjorte stak hovederne længere frem, rejste takkerne og drejede med halsen; gedebukkebens-overogundergeneral­krigskommander­sergenten sprang højt i vejret, og råbte over til den gamle kineser, "nu løber de! nu løber de!"</p>
+                        <p>Da blev de lidt forskrækkede, og sprang gesvindt op i skuffen til forhøjningen.</p>
+                        <p>Hvad ville skorstensfejerens ernære hyrdinden ved?</p>
                         <input type="text" id="userInput" placeholder="Skriv her">
                         <button onclick="checkInput()">Svar</button>
                         <p id="fejlbesked">Forkert svar. Prøv igen.</p>
@@ -75,10 +77,10 @@
         function checkInput() {
       const input = document.getElementById("userInput");
       const fejlbesked = document.getElementById("fejlbesked");
-      const korrektSvar = "hyrdinden"; // ← Skift dette til det korrekte svar
+      const korrektSvar = "professionen"; // ← Skift dette til det korrekte svar
 
       if (input.value.trim().toLowerCase() === korrektSvar.toLowerCase()) {
-        window.location.href = "escaperoomside3.html"; // ← Skift til den ønskede side
+        window.location.href = "escaperoomside4.html"; // ← Skift til den ønskede side
       } else {
         input.value = "";
         fejlbesked.style.display = "block";

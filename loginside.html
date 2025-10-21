@@ -7,7 +7,27 @@
     <link id="theme-style" rel="stylesheet" href="style.css">
     <link rel="icon" href="images/iaikon.png" type="image/x-icon">
     <style>
-              
+       main input[type="text"],
+main button {
+    font-size: 1.2rem;       /* Gør teksten større */
+    padding: 12px 20px;      /* Gør felterne større indvendigt */
+    width: 100%;             /* Fylder hele bredden af containeren */
+    max-width: 400px;        /* Begræns maksimal bredde */
+    margin: 10px 0;          /* Lidt luft omkring felterne */
+    box-sizing: border-box; /* Undgå at padding påvirker bredden */
+}
+
+main button {
+    background-color: #B2DFD3; /* grøn baggrund */
+    color: black;              /* sort tekst */
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+main button:hover {
+    background-color: #64C295; /* Mørkere grønved hover */
+}       
     </style>
     </head>
         
@@ -68,6 +88,14 @@
       fejlbesked.style.display = "block";
     }
   }
+  
+// Lyt efter Enter-tast i inputfeltet
+  document.getElementById("userInput").addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+      checkInput();
+    }
+  });
+
 </script>
 
 </body>
