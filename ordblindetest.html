@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <title>Ordblindetest</title>
+  <link id="theme-style" rel="stylesheet" href="style.css">
+  <link rel="icon" href="images/iaikon.png" type="image/x-icon">
+  <style>
+    
+    body {
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #272525;
+    }
+
+    #game-container {
+      position: relative;
+      width: 80%;
+      height: 80%;
+      border: 2px solid #B2DFD3;
+      overflow: hidden;
+    }
+
+    #left-side, #right-side {
+      position: absolute;
+      top: 0;
+      width: 20%;
+      height: 100%;
+      font-size: 4em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    #left-side {
+      left: 0;
+      background-color: #fdd;
+    }
+
+    #right-side {
+      right: 0;
+      background-color: #dfd;
+    }
+
+    #word {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #B2DFD3;
+      color: black !important;
+      padding: 20px;
+      border: 2px solid #64C295;
+      cursor: grab;
+    }
+
+    #message {
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
+      font-size: 1.2em;
+      color: #B2DFD3;
+    }
+  
+  </style>
+</head>
+<body>
+ <header class="header">
+        <!-- Første kolonne: Logo -->
+        <div class="column column-1">
+            <a href="loggedin.html">
+                <img id="logo" src="images/logohvid.png" alt="Logo" class="logo">
+            </a>
+        </div>
+        
+        <!-- Anden kolonne: Titel -->
+        <div class="column column-2">
+            <div class="title">
+                <h1>Ordblindetest</h1>
+            </div>
+        </div>
+        
+    </header>
+
+  <h2>Sortér ordene</h2>
+    <p>Hvis det lyder som et rigtigt ord, skal du give det til englen 👼</p>
+      <p>Hvis det bare er et vrøvleord, skal du give det til djævelen 😈</p>
+    <p>Et eksempel på et ord der lyder som et rigtigt ord, er "gifd". Det lyder nemlig som "gift".</p>
+  <div id="game-container">
+    <div id="left-side">
+      😈
+    </div>
+    <div id="right-side">
+      👼
+    </div>
+    <div id="word" draggable="true"></div>
+    <div id="message"></div>
+  </div>
+
+  <footer>
+    <p>Skriv til Interakt <a href="mailto:linda.rom@hotmail.com">interakt@interakt.dk</a></p>
+  </footer>
+    
+  <script>
+  const correctWords = [
+  { word: "slåk", dictionary: "sluk" },
+  { word: "sbel", dictionary: "spil" },
+  { word: "sgi", dictionary: "ski" },
+  { word: "slit", dictionary: "slidt" },
+  { word: "gråm", dictionary: "grum" }
+];
+
+const wrongWords = ["strun", "hundt", "bilk", "girk", "hubl", "silt"];
+
+let allWords = [
+  ...correctWords.map(w => ({ ...w, type: "correct" })),
+  ...wrongWords.map(w => ({ word: w, type: "wrong" }))
+];
+
+// Bland ordene
+allWords = allWords.sort(() => Math.random() - 0.5);
+
+let currentIndex = 0;
+let correctCount = 0;
+const totalCount = allWords.length;
+
+const wordElement = document.getElementById("word");
+const messageElement = document.getElementById("message");
+
+function showNextWord() {
+  if (currentIndex >= allWords.length) {
+    const percentCorrect = Math.round((correctCount / totalCount) * 100);
+    messageElement.textContent = `Testen er slut! Du fik ${percentCorrect}% rigtige.`;
+    wordElement.style.display = "none";
+    return;
+  }
+
+  const currentWord = allWords[currentIndex];
+  wordElement.textContent = currentWord.word;
+  wordElement.style.left = "50%";
+  wordElement.style.top = "50%";
+  wordElement.style.transform = "translate(-50%, -50%)";
+  wordElement.dataset.type = currentWord.type;
+  wordElement.dataset.dictionary = currentWord.dictionary || "";
+}
+
+wordElement.addEventListener("dragend", (e) => {
+  const x = e.clientX;
+  const screenWidth = window.innerWidth;
+  const isRight = x > screenWidth / 2;
+  const type = wordElement.dataset.type;
+  const dictionary = wordElement.dataset.dictionary;
+  let feedback = "";
+
+  if (type === "correct" && isRight) {
+    feedback = `Rigtigt, det lyder som "${dictionary}"`;
+    correctCount++;
+  } else if (type === "wrong" && !isRight) {
+    feedback = "Rigtigt, det er et vrøvleord.";
+    correctCount++;
+  } else if (type === "correct" && !isRight) {
+    feedback = `Forkert, det lyder som "${dictionary}"`;
+  } else if (type === "wrong" && isRight) {
+    feedback = "Forkert, det er et vrøvleord.";
+  }
+
+  messageElement.textContent = feedback;
+  currentIndex++;
+  setTimeout(showNextWord, 1500);
+});
+
+showNextWord();
+  </script>
+</body>
+
+
+ 
+
+     
+
+
+</body>
+</html>
