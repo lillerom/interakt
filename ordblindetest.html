@@ -25,7 +25,8 @@
       overflow: hidden;
     }
 
-    #left-side, #right-side {
+    /* sides renamed to devil/angel so mobile can switch to vertical layout */
+    #devil-side, #angel-side {
       position: absolute;
       top: 0;
       width: 20%;
@@ -38,16 +39,30 @@
       pointer-events: none;
     }
 
-    #left-side {
-      left: 0;
+    .side-label {
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      font-weight: 700;
+      color: #222;
+    }
+
+    #devil-side {
+      left: 0; /* previously left-side */
       background-color: #fdd;
     }
 
-    #right-side {
-      right: 0;
+    #angel-side {
+      right: 0; /* previously right-side */
       background-color: #dfd;
     }
 
+   
+
+    /* Desktop word styles - optimized for mouse dragging */
     #word {
       position: absolute;
       top: 50%;
@@ -57,8 +72,14 @@
       color: black !important;
       padding: 20px;
       border: 2px solid #64C295;
+      cursor: move; /* fallback */
       cursor: grab;
+      user-select: none;
+      -webkit-user-drag: element;
     }
+    #word:active { cursor: grabbing; }
+    #word:hover { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    #word[dragging="true"] { opacity: 0.8; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
 
     #message {
       position: absolute;
@@ -81,26 +102,46 @@
         align-items: flex-start; /* don't vertically center on small screens */
         padding-top: 20px;
         height: auto;
+        font-size: 6.5rem; /* larger base font on phones */
       }
       .intro-text {
         width: 95%;
         margin: 0.5rem auto;
-        font-size: 0.95rem;
+        font-size: 6.5rem; /* much larger intro text */
+        line-height: 1.05;
       }
       #game-container {
         width: 95%;
         height: 60vh;
         border-width: 1px;
       }
-      #left-side, #right-side {
-        width: 18%;
-        font-size: 3em;
+      /* On small screens we switch to a vertical layout:
+         angel-side at top, devil-side at bottom */
+      #devil-side, #angel-side {
+        font-size: 6.5em; /* larger emoji/label size */
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 18%;
       }
+      /* angel at top */
+      #angel-side { top: 0; }
+      /* devil at bottom */
+      #devil-side { bottom: 0; top: auto; }
+      /* Mobile word styles - optimized for touch */
       #word {
-        padding: 12px;
-        font-size: 1rem;
+        padding: 14px 18px;
+        font-size: 5rem; /* much larger word text */
+        touch-action: none; /* disable default touch behaviors */
+        -webkit-tap-highlight-color: transparent;
+        transition: transform 0.15s, box-shadow 0.15s;
       }
-      #message { font-size: 1rem; }
+      #word:active {
+        transform: translate(-50%, -50%) scale(1.05);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+      }
+      #message { font-size: 2.5rem; }
+      #goto-test { bottom: 12px; font-size: 2.5rem; padding: 12px 20px; }
     }
   </style>
 </head>
@@ -130,14 +171,15 @@
     <p>Træk ordet til venstre eller højre:</p>
   </div>
   <div id="game-container">
-    <div id="left-side">
-      😈
+    <div id="devil-side">
+      <span class="side-label">😈</span>
     </div>
-    <div id="right-side">
-      👼
+    <div id="angel-side">
+      <span class="side-label">👼</span>
     </div>
     <div id="word" draggable="true"></div>
     <div id="message"></div>
+    <button id="goto-test" style="display:none;">Gå til testen</button>
   </div>
   <p>Dette er ikke en officiel test. Kontakt en læsevejleder hvis testen er svær, tager lang tid, eller du har mange fejl.</p>
   <footer>
@@ -171,28 +213,58 @@ const totalCount = allWords.length;
 
 const wordElement = document.getElementById("word");
 const messageElement = document.getElementById("message");
+const gotoButton = document.getElementById('goto-test');
+
+// Track if we're on mobile
+const isMobile = window.matchMedia("(max-width: 600px)").matches;
 
 function showNextWord() {
+  // hide goto button while playing
+  if (gotoButton) gotoButton.style.display = 'none';
+
   if (currentIndex >= allWords.length) {
     const percentCorrect = Math.round((correctCount / totalCount) * 100);
     messageElement.textContent = `Testen er slut! Du fik ${percentCorrect}% rigtige.`;
     wordElement.style.display = "none";
+    if (gotoButton) gotoButton.style.display = 'block';
     return;
   }
 
   const currentWord = allWords[currentIndex];
+  // clear any previous drag state and temporarily disable native dragging
+  wordElement.removeAttribute('dragging');
+  wordElement.draggable = false;
   wordElement.textContent = currentWord.word;
   wordElement.style.left = "50%";
   wordElement.style.top = "50%";
   wordElement.style.transform = "translate(-50%, -50%)";
   wordElement.dataset.type = currentWord.type;
   wordElement.dataset.dictionary = currentWord.dictionary || "";
+
+  if (!isMobile) {
+    // on desktop re-enable dragging after mouseup to avoid auto-grab
+    const onMouseUp = () => {
+      wordElement.draggable = true;
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+    document.addEventListener('mouseup', onMouseUp);
+  } else {
+    // on mobile keep native draggable off (we use touch handlers)
+    wordElement.draggable = false;
+  }
 }
 
-wordElement.addEventListener("dragend", (e) => {
-  const x = e.clientX;
+// central drop handling used by mouse dragend and touch releases
+function handleDrop(clientX, clientY) {
   const screenWidth = window.innerWidth;
-  const isRight = x > screenWidth / 2;
+  let isRight = false;
+  if (screenWidth <= 600) {
+    const screenHeight = window.innerHeight;
+    isRight = clientY < screenHeight / 2; // dragged up => angel
+  } else {
+    isRight = clientX > screenWidth / 2;
+  }
+
   const type = wordElement.dataset.type;
   const dictionary = wordElement.dataset.dictionary;
   let feedback = "";
@@ -211,8 +283,67 @@ wordElement.addEventListener("dragend", (e) => {
 
   messageElement.textContent = feedback;
   currentIndex++;
-  setTimeout(showNextWord, 1500);
+  setTimeout(showNextWord, 500);
+}
+
+// preserve existing dragend behavior for mouse drag
+wordElement.addEventListener("dragend", (e) => {
+  wordElement.removeAttribute('dragging');
+  handleDrop(e.clientX, e.clientY);
 });
+
+// Desktop drag start
+wordElement.addEventListener("dragstart", (e) => {
+  wordElement.setAttribute('dragging', 'true');
+  try {
+    const rect = wordElement.getBoundingClientRect();
+    e.dataTransfer.setDragImage(wordElement, rect.width / 2, rect.height / 2);
+  } catch (err) {}
+});
+
+// Mobile: simplified touch-only handlers
+if (isMobile) {
+  let isTouching = false;
+  let startOffset = { x: 0, y: 0 };
+
+  wordElement.addEventListener('touchstart', (e) => {
+    if (e.touches.length > 1) return;
+    const t = e.touches[0];
+    isTouching = true;
+    const rect = wordElement.getBoundingClientRect();
+    startOffset.x = t.clientX - rect.left - rect.width / 2;
+    startOffset.y = t.clientY - rect.top - rect.height / 2;
+    e.preventDefault();
+  }, { passive: false });
+
+  wordElement.addEventListener('touchmove', (e) => {
+    if (!isTouching) return;
+    const t = e.touches[0];
+    const x = t.clientX - startOffset.x;
+    const y = t.clientY - startOffset.y;
+    const containerRect = document.getElementById('game-container').getBoundingClientRect();
+    const translateX = x - containerRect.left;
+    const translateY = y - containerRect.top;
+    wordElement.style.left = `${translateX}px`;
+    wordElement.style.top = `${translateY}px`;
+    wordElement.style.transform = `translate(-50%, -50%)`;
+    e.preventDefault();
+  }, { passive: false });
+
+  wordElement.addEventListener('touchend', (e) => {
+    if (!isTouching) return;
+    isTouching = false;
+    const changed = e.changedTouches[0];
+    handleDrop(changed.clientX, changed.clientY);
+  });
+}
+
+// Button to navigate when practice is done
+if (gotoButton) {
+  gotoButton.addEventListener('click', () => {
+    window.location.href = 'ordblindetest.html';
+  });
+}
 
 showNextWord();
   </script>
