@@ -2,7 +2,7 @@
 <html lang="da">
 <head>
   <meta charset="UTF-8">
-  <title>Ordblindetest</title>
+  <title>Ordblindetest test</title>
   <link id="theme-style" rel="stylesheet" href="style.css">
   <link rel="icon" href="images/iaikon.png" type="image/x-icon">
   <style>
@@ -68,13 +68,26 @@
       font-size: 1.2em;
       color: #B2DFD3;
     }
-  
-     .intro-text {
+    #goto-test {
+      position: absolute;
+      bottom: 50%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 18px;
+      background-color: #B2DFD3;
+      border: 2px solid #3a8f5f;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+      display: none; /* hidden until end */
+    }
+    .intro-text {
       width: 80%;
       margin: 0 auto 1rem; /* center horizontally, same width as #game-container */
       text-align: left; /* left-align the text inside */
       color: #B2DFD3; /* readable on dark background */
     }
+  
   </style>
 </head>
 <body>
@@ -95,14 +108,16 @@
         
     </header>
 
+  
   <div class="intro-text">
     <h2>Sortér ordene</h2>
     <p>Hvis det lyder som et rigtigt ord, skal du give det til englen 👼</p>
     <p>Hvis det bare er et vrøvleord, skal du give det til djævelen 😈</p>
     <p>Et eksempel på et ord der lyder som et rigtigt ord, er "gifd". Det lyder nemlig som "gift".</p>
-    <p>Træk ordet til venstre eller højre:</p>
+    <p>Prøv nu. Træk ordet til venstre eller højre (prøverunde):</p>
   </div>
   <div id="game-container">
+    
     <div id="left-side">
       😈
     </div>
@@ -111,6 +126,7 @@
     </div>
     <div id="word" draggable="true"></div>
     <div id="message"></div>
+    <button id="goto-test">Gå til testen</button>
   </div>
   <p>Dette er ikke en officiel test. Kontakt en læsevejleder hvis testen er svær, tager lang tid, eller du har mange fejl.</p>
   <footer>
@@ -119,16 +135,12 @@
     
   <script>
   const correctWords = [
-  { word: "slåk", dictionary: "sluk" },
-  { word: "sbel", dictionary: "spil" },
-  { word: "sgi", dictionary: "ski" },
-  { word: "slit", dictionary: "slidt" },
-  { word: "gråm", dictionary: "grum" },
-  { word: "løgge", dictionary: "lykke/løkke" },
-  { word: "kanne", dictionary: "kande" }
+  { word: "klasg", dictionary: "klask" },
+  { word: "kråp", dictionary: "krop" },
+  { word: "smælte", dictionary: "smelte" }
 ];
 
-const wrongWords = ["strun", "hundt", "bilk", "girk", "hulb", "silt", "sgrim"];
+const wrongWords = ["stron", "huf", "bolk"];
 
 let allWords = [
   ...correctWords.map(w => ({ ...w, type: "correct" })),
@@ -144,12 +156,18 @@ const totalCount = allWords.length;
 
 const wordElement = document.getElementById("word");
 const messageElement = document.getElementById("message");
+const gotoButton = document.getElementById('goto-test');
 
 function showNextWord() {
+  // hide the "Gå til testen" button while playing
+  if (gotoButton) gotoButton.style.display = 'none';
+
   if (currentIndex >= allWords.length) {
     const percentCorrect = Math.round((correctCount / totalCount) * 100);
-    messageElement.textContent = `Testen er slut! Du fik ${percentCorrect}% rigtige.`;
+    messageElement.textContent = `Du fik ${percentCorrect}% rigtige i prøvetesten. Vil du gå til testen?`;
     wordElement.style.display = "none";
+    // show the button so the user can navigate to the real test
+    if (gotoButton) gotoButton.style.display = 'block';
     return;
   }
 
@@ -186,8 +204,15 @@ wordElement.addEventListener("dragend", (e) => {
   currentIndex++;
   setTimeout(showNextWord, 1500);
 });
-
+// Initial call to start the practice
 showNextWord();
+
+// Button behavior: navigate to ordblindetest.html when practice ends
+if (gotoButton) {
+  gotoButton.addEventListener('click', () => {
+    window.location.href = 'ordblindetest.html';
+  });
+}
   </script>
 </body>
 
