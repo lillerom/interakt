@@ -25,7 +25,9 @@
       overflow: hidden;
     }
 
-    #left-side, #right-side {
+    /* desktop: keep the visual left/right placement, but elements are named top/bottom
+       so we can switch to a vertical layout in the mobile @media block */
+    #bottom-side, #top-side {
       position: absolute;
       top: 0;
       width: 20%;
@@ -38,15 +40,32 @@
       pointer-events: none;
     }
 
-    #left-side {
-      left: 0;
+    .side-label {
+      pointer-events: none; /* labels shouldn't intercept drag */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      font-weight: 700;
+      color: #222;
+      mix-blend-mode: normal;
+    }
+
+    /* keep previous left/right placement on wide screens */
+    #bottom-side {
+      left: 0; /* previously left-side */
       background-color: #fdd;
     }
 
-    #right-side {
-      right: 0;
+    #top-side {
+      right: 0; /* previously right-side */
       background-color: #dfd;
     }
+
+    /* make sure the label is readable against the background */
+    #top-side .side-label { color: #0b3a1a; }
+    #bottom-side .side-label { color: #3a0b0b; }
 
     #word {
       position: absolute;
@@ -58,6 +77,7 @@
       padding: 20px;
       border: 2px solid #64C295;
       cursor: grab;
+      touch-action: none; /* allow JS to handle touch dragging on mobile */
     }
 
     #message {
@@ -97,16 +117,33 @@
       .intro-text {
         width: 95%;
         margin: 0.5rem auto;
-        font-size: 0.95rem;
+        font-size: 3rem;
       }
       #game-container {
         width: 95%;
         height: 60vh;
         border-width: 1px;
       }
-      #left-side, #right-side {
-        width: 18%;
-        font-size: 3em;
+      /* On small screens we switch to a vertical layout: top and bottom.
+         The mapping requested: left -> bottom, right -> top. Because
+         the elements are named #bottom-side and #top-side, we position
+         them accordingly here. */
+      #bottom-side, #top-side { font-size: 3em; }
+      /* full-width bars at top and bottom */
+      #top-side {
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 18%;
+      }
+      #bottom-side {
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 18%;
+        top: auto;
       }
       #word {
         padding: 12px;
@@ -142,15 +179,15 @@
     <p>Hvis det lyder som et rigtigt ord, skal du give det til englen 👼</p>
     <p>Hvis det bare er et vrøvleord, skal du give det til djævelen 😈</p>
     <p>Et eksempel på et ord der lyder som et rigtigt ord, er "gifd". Det lyder nemlig som "gift".</p>
-    <p>Prøv nu. Træk ordet til venstre eller højre (prøverunde):</p>
+  <p>Prøv nu. Træk ordet til venstre eller højre (prøverunde). På små skærme træk op eller ned:</p>
   </div>
   <div id="game-container">
     
-    <div id="left-side">
-      😈
+    <div id="bottom-side">
+      <span class="side-label">😈 Vrøvleord</span>
     </div>
-    <div id="right-side">
-      👼
+    <div id="top-side">
+      <span class="side-label">👼 Rigtigt</span>
     </div>
     <div id="word" draggable="true"></div>
     <div id="message"></div>
@@ -208,10 +245,17 @@ function showNextWord() {
   wordElement.dataset.dictionary = currentWord.dictionary || "";
 }
 
-wordElement.addEventListener("dragend", (e) => {
-  const x = e.clientX;
+// central drop handling used by mouse dragend and touch/pointer releases
+function handleDrop(clientX, clientY) {
   const screenWidth = window.innerWidth;
-  const isRight = x > screenWidth / 2;
+  let isRight = false;
+  if (screenWidth <= 600) {
+    const screenHeight = window.innerHeight;
+    isRight = clientY < screenHeight / 2; // dragged up => old 'right' (now top)
+  } else {
+    isRight = clientX > screenWidth / 2;
+  }
+
   const type = wordElement.dataset.type;
   const dictionary = wordElement.dataset.dictionary;
   let feedback = "";
@@ -231,6 +275,83 @@ wordElement.addEventListener("dragend", (e) => {
   messageElement.textContent = feedback;
   currentIndex++;
   setTimeout(showNextWord, 1500);
+}
+
+// preserve existing dragend behavior for mouse drag
+wordElement.addEventListener("dragend", (e) => {
+  handleDrop(e.clientX, e.clientY);
+});
+
+// Pointer/touch dragging for mobile (works on iPhone)
+let isPointerDown = false;
+let pointerId = null;
+let startOffset = { x: 0, y: 0 };
+
+wordElement.addEventListener('pointerdown', (e) => {
+  // only react to primary button / touch
+  if (e.isPrimary === false) return;
+  isPointerDown = true;
+  pointerId = e.pointerId;
+  wordElement.setPointerCapture(pointerId);
+  wordElement.style.cursor = 'grabbing';
+  // calculate offset from element center
+  const rect = wordElement.getBoundingClientRect();
+  startOffset.x = e.clientX - rect.left - rect.width / 2;
+  startOffset.y = e.clientY - rect.top - rect.height / 2;
+});
+
+wordElement.addEventListener('pointermove', (e) => {
+  if (!isPointerDown || e.pointerId !== pointerId) return;
+  // move the element to follow pointer, keeping center under finger
+  const x = e.clientX - startOffset.x;
+  const y = e.clientY - startOffset.y;
+  // position relative to container
+  const containerRect = document.getElementById('game-container').getBoundingClientRect();
+  const translateX = x - containerRect.left;
+  const translateY = y - containerRect.top;
+  wordElement.style.left = `${translateX}px`;
+  wordElement.style.top = `${translateY}px`;
+  wordElement.style.transform = `translate(-50%, -50%)`;
+});
+
+wordElement.addEventListener('pointerup', (e) => {
+  if (!isPointerDown || e.pointerId !== pointerId) return;
+  try { wordElement.releasePointerCapture(pointerId); } catch (err) {}
+  isPointerDown = false;
+  pointerId = null;
+  wordElement.style.cursor = 'grab';
+  handleDrop(e.clientX, e.clientY);
+});
+
+// Fallback for older mobile browsers that don't support pointer events
+wordElement.addEventListener('touchstart', (e) => {
+  if (e.touches.length > 1) return; // ignore multi-touch
+  e.preventDefault();
+  const t = e.touches[0];
+  isPointerDown = true;
+  startOffset.x = t.clientX - wordElement.getBoundingClientRect().left - wordElement.getBoundingClientRect().width / 2;
+  startOffset.y = t.clientY - wordElement.getBoundingClientRect().top - wordElement.getBoundingClientRect().height / 2;
+});
+
+wordElement.addEventListener('touchmove', (e) => {
+  if (!isPointerDown) return;
+  const t = e.touches[0];
+  const x = t.clientX - startOffset.x;
+  const y = t.clientY - startOffset.y;
+  const containerRect = document.getElementById('game-container').getBoundingClientRect();
+  const translateX = x - containerRect.left;
+  const translateY = y - containerRect.top;
+  wordElement.style.left = `${translateX}px`;
+  wordElement.style.top = `${translateY}px`;
+  wordElement.style.transform = `translate(-50%, -50%)`;
+  e.preventDefault();
+});
+
+wordElement.addEventListener('touchend', (e) => {
+  if (!isPointerDown) return;
+  isPointerDown = false;
+  const changed = e.changedTouches[0];
+  handleDrop(changed.clientX, changed.clientY);
 });
 // Initial call to start the practice
 showNextWord();
@@ -242,13 +363,5 @@ if (gotoButton) {
   });
 }
   </script>
-</body>
-
-
- 
-
-     
-
-
 </body>
 </html>
