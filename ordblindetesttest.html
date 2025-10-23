@@ -87,6 +87,34 @@
       text-align: left; /* left-align the text inside */
       color: #B2DFD3; /* readable on dark background */
     }
+    /* Responsive adjustments for small screens */
+    @media (max-width: 600px) {
+      body {
+        align-items: flex-start; /* don't vertically center on small screens */
+        padding-top: 20px;
+        height: auto;
+      }
+      .intro-text {
+        width: 95%;
+        margin: 0.5rem auto;
+        font-size: 0.95rem;
+      }
+      #game-container {
+        width: 95%;
+        height: 60vh;
+        border-width: 1px;
+      }
+      #left-side, #right-side {
+        width: 18%;
+        font-size: 3em;
+      }
+      #word {
+        padding: 12px;
+        font-size: 1rem;
+      }
+      #message { font-size: 1rem; }
+      #goto-test { bottom: 12px; }
+    }
   
   </style>
 </head>
@@ -164,7 +192,7 @@ function showNextWord() {
 
   if (currentIndex >= allWords.length) {
     const percentCorrect = Math.round((correctCount / totalCount) * 100);
-    messageElement.textContent = `Du fik ${percentCorrect}% rigtige i prøvetesten. Vil du gå til testen?`;
+    messageElement.textContent = `Du fik ${percentCorrect}% rigtige i prøverunden. Vil du gå til testen?`;
     wordElement.style.display = "none";
     // show the button so the user can navigate to the real test
     if (gotoButton) gotoButton.style.display = 'block';
