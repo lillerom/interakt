@@ -27,7 +27,7 @@
 
     /* desktop: keep the visual left/right placement, but elements are named top/bottom
        so we can switch to a vertical layout in the mobile @media block */
-    #bottom-side, #top-side {
+    #devil-side, #angel-side {
       position: absolute;
       top: 0;
       width: 20%;
@@ -53,20 +53,21 @@
     }
 
     /* keep previous left/right placement on wide screens */
-    #bottom-side {
+    #devil-side {
       left: 0; /* previously left-side */
       background-color: #fdd;
     }
 
-    #top-side {
+    #angel-side {
       right: 0; /* previously right-side */
       background-color: #dfd;
     }
 
     /* make sure the label is readable against the background */
-    #top-side .side-label { color: #0b3a1a; }
-    #bottom-side .side-label { color: #3a0b0b; }
+    #angel-side .side-label { color: #0b3a1a; }
+    #devil-side .side-label { color: #3a0b0b; }
 
+    /* Desktop word styles - optimized for mouse dragging */
     #word {
       position: absolute;
       top: 50%;
@@ -77,7 +78,13 @@
       padding: 20px;
       border: 2px solid #64C295;
       cursor: grab;
-      touch-action: none; /* allow JS to handle touch dragging on mobile */
+      user-select: none;
+      will-change: transform; /* optimize animations */
+      transition: box-shadow 0.2s;
+    }
+    #word:active {
+      cursor: grabbing;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
 
     #message {
@@ -124,30 +131,35 @@
         height: 60vh;
         border-width: 1px;
       }
-      /* On small screens we switch to a vertical layout: top and bottom.
-         The mapping requested: left -> bottom, right -> top. Because
-         the elements are named #bottom-side and #top-side, we position
-         them accordingly here. */
-      #bottom-side, #top-side { font-size: 3em; }
-      /* full-width bars at top and bottom */
-      #top-side {
-        top: 0;
+      /* On small screens we switch to a vertical layout:
+         angel-side at top, devil-side at bottom */
+      #devil-side, #angel-side {
+        font-size: 3em;
         left: 0;
         right: 0;
         width: 100%;
         height: 18%;
       }
-      #bottom-side {
+      /* angel at top */
+      #angel-side {
+        top: 0;
+      }
+      /* devil at bottom */
+      #devil-side {
         bottom: 0;
-        left: 0;
-        right: 0;
-        width: 100%;
-        height: 18%;
         top: auto;
       }
+      /* Mobile word styles - optimized for touch */
       #word {
         padding: 12px;
-        font-size: 1rem;
+        font-size: 3rem;
+        touch-action: none; /* only disable touch actions on mobile */
+        -webkit-tap-highlight-color: transparent;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      #word:active {
+        transform: translate(-50%, -50%) scale(1.05);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.2);
       }
       #message { font-size: 1rem; }
       #goto-test { bottom: 12px; }
@@ -183,11 +195,11 @@
   </div>
   <div id="game-container">
     
-    <div id="bottom-side">
-      <span class="side-label">😈 Vrøvleord</span>
+    <div id="devil-side">
+      <span class="side-label">😈</span>
     </div>
-    <div id="top-side">
-      <span class="side-label">👼 Rigtigt</span>
+    <div id="angel-side">
+      <span class="side-label">👼</span>
     </div>
     <div id="word" draggable="true"></div>
     <div id="message"></div>
