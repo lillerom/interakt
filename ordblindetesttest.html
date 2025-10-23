@@ -77,15 +77,21 @@
       color: black !important;
       padding: 20px;
       border: 2px solid #64C295;
-      cursor: grab;
-      user-select: none;
-      will-change: transform; /* optimize animations */
-      transition: box-shadow 0.2s;
+        cursor: move; /* fallback */
+        cursor: grab;
+        user-select: none;
+        -webkit-user-drag: element;
     }
     #word:active {
       cursor: grabbing;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
+      #word:hover {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      #word[dragging="true"] {
+        opacity: 0.8;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
 
     #message {
       position: absolute;
@@ -120,11 +126,12 @@
         align-items: flex-start; /* don't vertically center on small screens */
         padding-top: 20px;
         height: auto;
+        font-size: 5rem;
       }
       .intro-text {
         width: 95%;
         margin: 0.5rem auto;
-        font-size: 3rem;
+        font-size: 5rem;
       }
       #game-container {
         width: 95%;
@@ -134,7 +141,7 @@
       /* On small screens we switch to a vertical layout:
          angel-side at top, devil-side at bottom */
       #devil-side, #angel-side {
-        font-size: 3em;
+        font-size: 5em;
         left: 0;
         right: 0;
         width: 100%;
@@ -235,6 +242,9 @@ const wordElement = document.getElementById("word");
 const messageElement = document.getElementById("message");
 const gotoButton = document.getElementById('goto-test');
 
+// Track if we're on mobile
+const isMobile = window.matchMedia("(max-width: 600px)").matches;
+
 function showNextWord() {
   // hide the "Gå til testen" button while playing
   if (gotoButton) gotoButton.style.display = 'none';
@@ -249,12 +259,33 @@ function showNextWord() {
   }
 
   const currentWord = allWords[currentIndex];
+  // ensure any previous dragging state is cleared
+  wordElement.removeAttribute('dragging');
+  // temporarily disable native dragging to avoid the browser immediately
+  // starting a new drag on the freshly shown element (this prevents
+  // the "auto-grab" issue on desktop where the next word gets grabbed
+  // without user input).
+  wordElement.draggable = false;
+  // show the new word
   wordElement.textContent = currentWord.word;
   wordElement.style.left = "50%";
   wordElement.style.top = "50%";
   wordElement.style.transform = "translate(-50%, -50%)";
   wordElement.dataset.type = currentWord.type;
   wordElement.dataset.dictionary = currentWord.dictionary || "";
+  // Re-enable native dragging only when the mouse is released to avoid
+  // the browser auto-starting a drag on the newly created element.
+  // This listens once on the document for a mouseup (desktop only).
+  if (!isMobile) {
+    const onMouseUp = () => {
+      wordElement.draggable = true;
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+    document.addEventListener('mouseup', onMouseUp);
+  } else {
+    // on mobile re-enable right away (touch handlers control behavior)
+    wordElement.draggable = true;
+  }
 }
 
 // central drop handling used by mouse dragend and touch/pointer releases
@@ -286,85 +317,99 @@ function handleDrop(clientX, clientY) {
 
   messageElement.textContent = feedback;
   currentIndex++;
-  setTimeout(showNextWord, 1500);
+  setTimeout(showNextWord, 500);
 }
 
 // preserve existing dragend behavior for mouse drag
 wordElement.addEventListener("dragend", (e) => {
+  wordElement.removeAttribute('dragging');
   handleDrop(e.clientX, e.clientY);
 });
 
-// Pointer/touch dragging for mobile (works on iPhone)
-let isPointerDown = false;
-let pointerId = null;
-let startOffset = { x: 0, y: 0 };
-
-wordElement.addEventListener('pointerdown', (e) => {
-  // only react to primary button / touch
-  if (e.isPrimary === false) return;
-  isPointerDown = true;
-  pointerId = e.pointerId;
-  wordElement.setPointerCapture(pointerId);
-  wordElement.style.cursor = 'grabbing';
-  // calculate offset from element center
-  const rect = wordElement.getBoundingClientRect();
-  startOffset.x = e.clientX - rect.left - rect.width / 2;
-  startOffset.y = e.clientY - rect.top - rect.height / 2;
+// Desktop drag start
+wordElement.addEventListener("dragstart", (e) => {
+  wordElement.setAttribute('dragging', 'true');
+  // Set drag image (optional)
+  try {
+    const rect = wordElement.getBoundingClientRect();
+    e.dataTransfer.setDragImage(wordElement, rect.width / 2, rect.height / 2);
+  } catch (err) {} // Ignore if not supported
 });
 
-wordElement.addEventListener('pointermove', (e) => {
-  if (!isPointerDown || e.pointerId !== pointerId) return;
-  // move the element to follow pointer, keeping center under finger
-  const x = e.clientX - startOffset.x;
-  const y = e.clientY - startOffset.y;
-  // position relative to container
-  const containerRect = document.getElementById('game-container').getBoundingClientRect();
-  const translateX = x - containerRect.left;
-  const translateY = y - containerRect.top;
-  wordElement.style.left = `${translateX}px`;
-  wordElement.style.top = `${translateY}px`;
-  wordElement.style.transform = `translate(-50%, -50%)`;
-});
+// Only initialize touch/pointer events on mobile
+if (isMobile) {
+  // Pointer/touch dragging for mobile (works on iPhone)
+  let isPointerDown = false;
+  let pointerId = null;
+  let startOffset = { x: 0, y: 0 };
 
-wordElement.addEventListener('pointerup', (e) => {
-  if (!isPointerDown || e.pointerId !== pointerId) return;
-  try { wordElement.releasePointerCapture(pointerId); } catch (err) {}
-  isPointerDown = false;
-  pointerId = null;
-  wordElement.style.cursor = 'grab';
-  handleDrop(e.clientX, e.clientY);
-});
+  wordElement.addEventListener('pointerdown', (e) => {
+    // only react to primary button / touch
+    if (e.isPrimary === false) return;
+    isPointerDown = true;
+    pointerId = e.pointerId;
+    wordElement.setPointerCapture(pointerId);
+    wordElement.style.cursor = 'grabbing';
+    // calculate offset from element center
+    const rect = wordElement.getBoundingClientRect();
+    startOffset.x = e.clientX - rect.left - rect.width / 2;
+    startOffset.y = e.clientY - rect.top - rect.height / 2;
+  });
 
-// Fallback for older mobile browsers that don't support pointer events
-wordElement.addEventListener('touchstart', (e) => {
-  if (e.touches.length > 1) return; // ignore multi-touch
-  e.preventDefault();
-  const t = e.touches[0];
-  isPointerDown = true;
-  startOffset.x = t.clientX - wordElement.getBoundingClientRect().left - wordElement.getBoundingClientRect().width / 2;
-  startOffset.y = t.clientY - wordElement.getBoundingClientRect().top - wordElement.getBoundingClientRect().height / 2;
-});
+  wordElement.addEventListener('pointermove', (e) => {
+    if (!isPointerDown || e.pointerId !== pointerId) return;
+    // move the element to follow pointer, keeping center under finger
+    const x = e.clientX - startOffset.x;
+    const y = e.clientY - startOffset.y;
+    // position relative to container
+    const containerRect = document.getElementById('game-container').getBoundingClientRect();
+    const translateX = x - containerRect.left;
+    const translateY = y - containerRect.top;
+    wordElement.style.left = `${translateX}px`;
+    wordElement.style.top = `${translateY}px`;
+    wordElement.style.transform = `translate(-50%, -50%)`;
+  });
 
-wordElement.addEventListener('touchmove', (e) => {
-  if (!isPointerDown) return;
-  const t = e.touches[0];
-  const x = t.clientX - startOffset.x;
-  const y = t.clientY - startOffset.y;
-  const containerRect = document.getElementById('game-container').getBoundingClientRect();
-  const translateX = x - containerRect.left;
-  const translateY = y - containerRect.top;
-  wordElement.style.left = `${translateX}px`;
-  wordElement.style.top = `${translateY}px`;
-  wordElement.style.transform = `translate(-50%, -50%)`;
-  e.preventDefault();
-});
+  wordElement.addEventListener('pointerup', (e) => {
+    if (!isPointerDown || e.pointerId !== pointerId) return;
+    try { wordElement.releasePointerCapture(pointerId); } catch (err) {}
+    isPointerDown = false;
+    pointerId = null;
+    wordElement.style.cursor = 'grab';
+    handleDrop(e.clientX, e.clientY);
+  });
 
-wordElement.addEventListener('touchend', (e) => {
-  if (!isPointerDown) return;
-  isPointerDown = false;
-  const changed = e.changedTouches[0];
-  handleDrop(changed.clientX, changed.clientY);
-});
+  // Fallback for older mobile browsers that don't support pointer events
+  wordElement.addEventListener('touchstart', (e) => {
+    if (e.touches.length > 1) return; // ignore multi-touch
+    e.preventDefault();
+    const t = e.touches[0];
+    isPointerDown = true;
+    startOffset.x = t.clientX - wordElement.getBoundingClientRect().left - wordElement.getBoundingClientRect().width / 2;
+    startOffset.y = t.clientY - wordElement.getBoundingClientRect().top - wordElement.getBoundingClientRect().height / 2;
+  });
+
+  wordElement.addEventListener('touchmove', (e) => {
+    if (!isPointerDown) return;
+    const t = e.touches[0];
+    const x = t.clientX - startOffset.x;
+    const y = t.clientY - startOffset.y;
+    const containerRect = document.getElementById('game-container').getBoundingClientRect();
+    const translateX = x - containerRect.left;
+    const translateY = y - containerRect.top;
+    wordElement.style.left = `${translateX}px`;
+    wordElement.style.top = `${translateY}px`;
+    wordElement.style.transform = `translate(-50%, -50%)`;
+    e.preventDefault();
+  });
+
+  wordElement.addEventListener('touchend', (e) => {
+    if (!isPointerDown) return;
+    isPointerDown = false;
+    const changed = e.changedTouches[0];
+    handleDrop(changed.clientX, changed.clientY);
+  });
+}
 // Initial call to start the practice
 showNextWord();
 
