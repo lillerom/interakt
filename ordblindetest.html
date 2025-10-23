@@ -33,7 +33,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      opacity: 0.7;
+      opacity: 1;
       pointer-events: none;
     }
 
@@ -102,7 +102,7 @@
     <div id="word" draggable="true"></div>
     <div id="message"></div>
   </div>
-
+  <p>Dette er ikke en officiel test. Kontakt en læsevejleder hvis testen er svær, tager lang tid, eller du har mange fejl.</p>
   <footer>
     <p>Skriv til Interakt <a href="mailto:linda.rom@hotmail.com">interakt@interakt.dk</a></p>
   </footer>
@@ -113,10 +113,12 @@
   { word: "sbel", dictionary: "spil" },
   { word: "sgi", dictionary: "ski" },
   { word: "slit", dictionary: "slidt" },
-  { word: "gråm", dictionary: "grum" }
+  { word: "gråm", dictionary: "grum" },
+  { word: "løgge", dictionary: "lykke/løkke" },
+  { word: "kanne", dictionary: "kande" }
 ];
 
-const wrongWords = ["strun", "hundt", "bilk", "girk", "hubl", "silt"];
+const wrongWords = ["strun", "hundt", "bilk", "girk", "hulb", "silt", "sgrim"];
 
 let allWords = [
   ...correctWords.map(w => ({ ...w, type: "correct" })),
