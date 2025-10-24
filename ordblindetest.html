@@ -141,7 +141,7 @@
         box-shadow: 0 6px 12px rgba(0,0,0,0.2);
       }
       #message { font-size: 2.5rem; }
-      #goto-test { bottom: 12px; font-size: 2.5rem; padding: 12px 20px; }
+     
     }
   </style>
 </head>
@@ -179,7 +179,7 @@
     </div>
     <div id="word" draggable="true"></div>
     <div id="message"></div>
-    <button id="goto-test" style="display:none;">Gå til testen</button>
+   
   </div>
   <p>Dette er ikke en officiel test. Kontakt en læsevejleder hvis testen er svær, tager lang tid, eller du har mange fejl.</p>
   <footer>
@@ -194,10 +194,11 @@
   { word: "slit", dictionary: "slidt" },
   { word: "gråm", dictionary: "grum" },
   { word: "løgge", dictionary: "lykke/løkke" },
-  { word: "kanne", dictionary: "kande" }
+  { word: "kanne", dictionary: "kande" },
+  { word: "smælte", dictionary: "smelte" }
 ];
 
-const wrongWords = ["strun", "hundt", "bilk", "girk", "hulb", "silt", "sgrim"];
+const wrongWords = ["strun", "hundt", "bilk", "girk", "hulb", "silt", "sgrim", "hulf"];
 
 let allWords = [
   ...correctWords.map(w => ({ ...w, type: "correct" })),
@@ -213,14 +214,13 @@ const totalCount = allWords.length;
 
 const wordElement = document.getElementById("word");
 const messageElement = document.getElementById("message");
-const gotoButton = document.getElementById('goto-test');
+
 
 // Track if we're on mobile
 const isMobile = window.matchMedia("(max-width: 600px)").matches;
 
 function showNextWord() {
-  // hide goto button while playing
-  if (gotoButton) gotoButton.style.display = 'none';
+
 
   if (currentIndex >= allWords.length) {
     const percentCorrect = Math.round((correctCount / totalCount) * 100);
@@ -283,7 +283,7 @@ function handleDrop(clientX, clientY) {
 
   messageElement.textContent = feedback;
   currentIndex++;
-  setTimeout(showNextWord, 500);
+  setTimeout(showNextWord, 100);
 }
 
 // preserve existing dragend behavior for mouse drag
@@ -338,12 +338,7 @@ if (isMobile) {
   });
 }
 
-// Button to navigate when practice is done
-if (gotoButton) {
-  gotoButton.addEventListener('click', () => {
-    window.location.href = 'ordblindetest.html';
-  });
-}
+
 
 showNextWord();
   </script>

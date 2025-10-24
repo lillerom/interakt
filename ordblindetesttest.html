@@ -103,7 +103,7 @@
     }
     #goto-test {
       position: absolute;
-      bottom: 50%;
+      bottom:30%;
       left: 50%;
       transform: translateX(-50%);
       padding: 10px 18px;
@@ -199,7 +199,7 @@
     <p>Hvis det lyder som et rigtigt ord, skal du give det til englen 👼</p>
     <p>Hvis det bare er et vrøvleord, skal du give det til djævelen 😈</p>
     <p>Et eksempel på et ord der lyder som et rigtigt ord, er "gifd". Det lyder nemlig som "gift".</p>
-  <p>Prøv nu. Træk ordet til venstre eller højre (prøverunde). På små skærme træk op eller ned:</p>
+  <p>Prøv nu. Træk ordet til venstre eller højre (prøverunde):</p>
   </div>
   <div id="game-container">
     
@@ -212,6 +212,7 @@
     <div id="word" draggable="true"></div>
     <div id="message"></div>
     <button id="goto-test">Gå til testen</button>
+  
   </div>
   <p>Dette er ikke en officiel test. Kontakt en læsevejleder hvis testen er svær, tager lang tid, eller du har mange fejl.</p>
   <footer>
@@ -221,11 +222,10 @@
   <script>
   const correctWords = [
   { word: "klasg", dictionary: "klask" },
-  { word: "kråp", dictionary: "krop" },
-  { word: "smælte", dictionary: "smelte" }
+  { word: "kråp", dictionary: "krop" }
 ];
 
-const wrongWords = ["stron", "huf", "bolk"];
+const wrongWords = ["stron", "bålk"];
 
 let allWords = [
   ...correctWords.map(w => ({ ...w, type: "correct" })),
@@ -318,7 +318,7 @@ function handleDrop(clientX, clientY) {
 
   messageElement.textContent = feedback;
   currentIndex++;
-  setTimeout(showNextWord, 500);
+  setTimeout(showNextWord, 100);
 }
 
 // preserve existing dragend behavior for mouse drag
