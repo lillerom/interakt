@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="da">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interakt under construction</title>
+    <link id="theme-style" rel="stylesheet" href="style.css">
+    <link rel="icon" href="images/iaikon.png" type="image/x-icon">
+    <style>
+        /* Responsive container for Scratch iframe */
+        .scratch-container {
+            position: relative;
+            width: 100%;
+            max-width: 485px;
+            margin: 20px auto;
+            overflow: hidden;
+            padding-top: 82.886%; /* 402/485 = 82.886% - maintains aspect ratio */
+        }
+        
+        .scratch-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+    </style>
+    </head>
+        
+<body>
+    <header class="header">
+        <!-- Første kolonne: Logo -->
+        <div class="column column-1">
+            <a href="loggedin.html">
+                <img id="logo" src="images/logohvid.png" alt="Logo" class="logo">
+            </a>
+        </div>
+        
+        <!-- Anden kolonne: Titel -->
+        <div class="column column-2">
+            <div class="title">
+                <h1>Visual Novel</h1>
+                
+            </div>
+        </div>
+        
+        <!-- Tredje kolonne: Nested kolonner -->
+        <div class="column column-3"></div>
+            
+        
+    </header>
+    
+    <main style="text-align: center; display: flex; flex-direction: column; align-items: center; margin-top: 80px; padding: 40px 20px;">
+        <h1>Demo</h1>
+        <div class="scratch-container">
+            <iframe 
+                src="https://scratch.mit.edu/projects/1234217708/embed" 
+                allowtransparency="true"
+                scrolling="no" 
+                allowfullscreen>
+            </iframe>
+        </div>
+        
+    </main>
+
+    <footer>
+        <p>Skriv til Interakt <a href="mailto:linda.rom@hotmail.com">interakt@interakt.dk</a></p>
+    </footer>
+    
+ 
+    <script src="script.js"></script> 
+</body>
+
+</html>
